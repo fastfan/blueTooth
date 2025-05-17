@@ -71,16 +71,28 @@
 				</view>
 				<view class="order-list">
 					<view class="title">历史指令</view>
-					<uni-tag
-						class="tag"
-						v-for="(item, index) in historyTag"
-						:key="item.text"
-						:text="item.text"
-						:inverted="true"
-						type="default"
-						:circle="false"
-						@click="clickTag(item)"
-					></uni-tag>
+					<view style="display: flex; flex-wrap: wrap">
+						<view
+							v-for="(item, index) in historyTag"
+							:key="item.text"
+							style="position: relative; margin-right: 0; margin-bottom: 0"
+						>
+							<uni-tag
+								class="tag"
+								:text="item.text"
+								:inverted="true"
+								type="default"
+								:circle="false"
+								@click="clickTag(item)"
+							></uni-tag>
+							<uni-icons
+								@click="deleteTag(index)"
+								type="clear"
+								size="20"
+								style="position: absolute; right: 2rpx; top: -20rpx"
+							></uni-icons>
+						</view>
+					</view>
 				</view>
 				<view class="order-list-current">
 					<view class="item" v-for="(item, index) in orderList" :key="index">
@@ -528,6 +540,9 @@ export default {
 		recordChange() {},
 		maskClick(e) {
 			console.log('maskClick事件:', e)
+		},
+		deleteTag(index) {
+			this.historyTag.splice(index, 1)
 		}
 	}
 }
@@ -596,8 +611,8 @@ export default {
 			}
 			.tag {
 				.uni-tag {
-					margin-right: 24rpx;
 					margin-bottom: 24rpx;
+					margin-right: 24rpx;
 					display: inline-block;
 				}
 			}
