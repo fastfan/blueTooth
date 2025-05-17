@@ -124,7 +124,12 @@
 						<uni-datetime-picker class="search-item" v-model="rangeTime" type="daterange" @maskClick="maskClick" />
 					</view>
 					<view class="search-bar">
-						<uni-data-select class="search-item" v-model="recordValue" :localdata="range" @change="recordChange"></uni-data-select>
+						<uni-data-select
+							class="search-item"
+							v-model="recordValue"
+							:localdata="range"
+							@change="recordChange"
+						></uni-data-select>
 						<uni-search-bar
 							class="search-item"
 							radius="5"
@@ -248,9 +253,11 @@ export default {
 		startScan() {
 			let that = this
 			that.devices = [] // 清空设备列表
+			that.connectedDevice = {}
 			uni.openBluetoothAdapter({
 				success(res) {
 					console.log('蓝牙适配器初始化成功', res)
+					uni.stopBluetoothDevicesDiscovery() //停止扫描附近蓝牙
 					uni.startBluetoothDevicesDiscovery({
 						success: (res) => {
 							console.log('开始扫描', res)
@@ -308,7 +315,6 @@ export default {
 					deviceId: device.deviceId,
 					success: (res) => {
 						console.log('连接成功', res)
-
 						_this.connectedDevice = device
 						device.status = 1
 						uni.setStorageSync('deviceId', device.deviceId) //将蓝牙id存入缓存
@@ -322,7 +328,7 @@ export default {
 						console.error('连接失败', err)
 						uni.hideLoading()
 						setTimeout(() => {
-							uni.showToast({ title: '连接失败', icon: 'none' })
+							uni.showToast({ title: bluetoothInitCode.get(err.errCode), icon: 'none' })
 						}, 1000)
 					}
 				})
