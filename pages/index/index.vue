@@ -1,6 +1,6 @@
 <template>
 	<view class="container">
-		<view class="title-content">当前链接：{{ connectedDevice.name ? connectedDevice.name : '未知设备' }}</view>
+		<view class="title-content">当前链接：{{ connectedDevice.name ? connectedDevice.name : '' }}</view>
 		<view class="uni-padding-wrap uni-common-mt">
 			<uni-segmented-control
 				:current="current"
@@ -263,7 +263,7 @@ export default {
 						fail: (err) => {
 							console.error('扫描失败', err)
 							uni.showToast({
-								title: bluetoothInitCode.get(err.code),
+								title: bluetoothInitCode.get(err.errCode),
 								icon: 'none'
 							})
 						}
@@ -272,7 +272,7 @@ export default {
 				fail(err) {
 					console.error('蓝牙初始化失败', err)
 					uni.showToast({
-						title: bluetoothInitCode.get(err.code),
+						title: bluetoothInitCode.get(err.errCode),
 						icon: 'none'
 					})
 				}
@@ -284,41 +284,51 @@ export default {
 				console.log('res::::', res)
 				const device = res.devices[0]
 				if (device && !this.devices.some((d) => d.deviceId === device.deviceId)) {
-					this.devices.push({ ...device, status: 0 }) // 添加到设备列表
+					this.devices.push({ ...device, name: device.name ? device.name : '未知设备', status: 0 }) // 添加到设备列表
 					uni.hideLoading()
 				}
 			})
 		},
 		// 【3】设备连接
 		connectDevice(device) {
+			console.log('this.connectedDevice::::::', this.connectedDevice)
+			console.log('device::::::', device)
 			const _this = this
-			if (_this.connectedDevice.deviceId === device.deviceId) {
-				if (device.status == 0) {
-					// 连接
-					uni.createBLEConnection({
-						deviceId: device.deviceId,
-						success: (res) => {
-							console.log('连接成功', res)
-							_this.connectedDevice = device
-							device.status = 1
-							uni.setStorageSync('deviceId', device.deviceId) //将蓝牙id存入缓存
-							console.log('deviceId:' + uni.getStorageSync('deviceId')) //打印
-							uni.stopBluetoothDevicesDiscovery() //停止扫描附近蓝牙
-							uni.showToast({ title: '连接成功', icon: 'success' })
-						},
-						fail: (err) => {
-							console.error('连接失败', err)
-							uni.showToast({ title: bluetoothInitCode.get(err.code), icon: 'none' })
-						}
-					})
-				} else {
-					// 断开连接
-					this.closeBlueTooth()
+			if (device.status == 0) {
+				// 连接
+				if (_this.connectedDevice.deviceId && _this.connectedDevice.deviceId != device.deviceId) {
+					uni.showToast({ title: '请先断开其它设备连接！', icon: 'none' })
+					return
 				}
-			} else {
-				uni.showToast({
-					title: '请先断开其它设备连接！'
+				uni.showLoading({
+					mask: true,
+					title: '连接中...'
 				})
+				uni.createBLEConnection({
+					deviceId: device.deviceId,
+					success: (res) => {
+						console.log('连接成功', res)
+
+						_this.connectedDevice = device
+						device.status = 1
+						uni.setStorageSync('deviceId', device.deviceId) //将蓝牙id存入缓存
+						console.log('deviceId:' + uni.getStorageSync('deviceId')) //打印
+						uni.stopBluetoothDevicesDiscovery() //停止扫描附近蓝牙
+						setTimeout(() => {
+							uni.showToast({ title: '连接成功', icon: 'success' })
+						}, 1000)
+					},
+					fail: (err) => {
+						console.error('连接失败', err)
+						uni.hideLoading()
+						setTimeout(() => {
+							uni.showToast({ title: '连接失败', icon: 'none' })
+						}, 1000)
+					}
+				})
+			} else {
+				// 断开连接
+				this.closeBlueTooth(device)
 			}
 		},
 		// 【4】获取蓝牙服务（获取设备提供的服务才能通过蓝牙进行数据读写）
@@ -469,20 +479,23 @@ export default {
 			})
 		},
 		// 断开蓝牙
-		closeBlueTooth() {
+		closeBlueTooth(device) {
+			const _this = this
 			uni.closeBLEConnection({
-				deviceId: this.connectedDevice.deviceId,
+				deviceId: _this.connectedDevice.deviceId,
 				success(res) {
 					console.log(res)
-					this.connectedDevice = {}
+					_this.connectedDevice = {}
+					device.status = 0
 					uni.showToast({
 						title: '断开蓝牙连接成功'
 					})
+					uni.removeStorageSync('deviceId')
 				},
 				fail(err) {
 					console.error(err)
 					uni.showToast({
-						title: bluetoothInitCode.get(err.code),
+						title: bluetoothInitCode.get(err.errCode),
 						icon: 'error'
 					})
 				}
@@ -615,10 +628,11 @@ export default {
 		}
 		.progress {
 			display: flex;
+			align-items: baseline;
 			.process-line {
 				flex: 1;
 				position: relative;
-				height: 40rpx;
+				height: 39rpx;
 				.blue-progress {
 					height: 20rpx;
 					border-radius: 10rpx;
