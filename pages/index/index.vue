@@ -1,5 +1,18 @@
 <template>
 	<view class="container">
+		<view class="container-empty" :style="{ height: menuInfo.top + 'px' }"></view>
+		<view class="container-box" :style="{ height: menuInfo.height + 'px' }">
+			<uni-easyinput trim="all" v-model="inputValue" placeholder="请输入内容" @input="input"></uni-easyinput>
+			<button
+				class="btn2"
+				size="mini"
+				@click="sendOrder(inputValue)"
+				:style="{ height: menuInfo.height + 'px', lineHeight: menuInfo.height + 'px' }"
+			>
+				发送
+			</button>
+			<view :style="{ width: menuInfo.width + 'px', height: menuInfo.height + 'px' }"></view>
+		</view>
 		<view class="title-content">当前链接：{{ connectedDevice.name ? connectedDevice.name : '' }}</view>
 		<view class="uni-padding-wrap uni-common-mt">
 			<uni-segmented-control
@@ -39,10 +52,10 @@
 			</view>
 			<view v-show="current === 1" class="tab-two">
 				<view class="order-title">AT 指令调试</view>
-				<view class="order-content">
+				<!-- <view class="order-content">
 					<uni-easyinput trim="all" v-model="inputValue" placeholder="请输入内容" @input="input"></uni-easyinput>
 					<button class="btn2" size="mini" @click="sendOrder(inputValue)">发送</button>
-				</view>
+				</view> -->
 				<view class="order-list">
 					<view class="title">常用查询</view>
 					<uni-tag
@@ -130,7 +143,7 @@
 				</view>
 			</view>
 			<view v-show="current === 3">
-				<view class="order-list" style="background: #fff; padding-bottom: 24rpx">
+				<view class="order-list" style="background: #fff; padding-bottom: 24rpx; max-height: 600rpx">
 					<view class="title">日志记录</view>
 					<view class="search-bar">
 						<uni-datetime-picker class="search-item" v-model="rangeTime" type="daterange" @maskClick="maskClick" />
@@ -181,6 +194,7 @@ import { bluetoothInitCode, ab2hex, hexCharCodeToStr } from '@/utils/util.js'
 export default {
 	data() {
 		return {
+			menuInfo: uni.getMenuButtonBoundingClientRect(),
 			current: 0,
 			items: ['设备连接', 'AT指令', 'OTA升级', '日志记录'],
 			activeColor: '#007aff',
@@ -521,11 +535,23 @@ export default {
 		},
 		// 发送指令
 		sendOrder(value) {
-			if (!value)
+			if (!value) {
 				uni.showToast({
 					title: '请输入指令！',
 					icon: 'none'
 				})
+				return
+			} else if (!this.connectedDevice.deviceId) {
+				uni.showToast({
+					title: '请连接设备！',
+					icon: 'none'
+				})
+				return
+			}
+			uni.showToast({
+				title: '发送成功',
+				icon: 'success'
+			})
 		},
 		clickTag(item) {
 			this.sendOrder(item.value)
@@ -550,10 +576,25 @@ export default {
 
 <style lang="scss">
 .container {
-	padding: 20px;
+	padding: 0 10px 20px 10px;
 	font-size: 14px;
 	line-height: 24px;
 	overflow: hidden;
+	.uni-easyinput__content-input {
+		height: 32px;
+	}
+	.container-box {
+		display: flex;
+		align-items: center;
+		margin-bottom: 20px;
+	}
+	.btn2 {
+		background: #007aff;
+		color: #fff;
+		margin-left: 24rpx;
+		height: 32px;
+		line-height: 32px;
+	}
 	.title-content {
 		display: flex;
 		align-items: center;
@@ -595,17 +636,12 @@ export default {
 			align-items: center;
 			justify-content: space-between;
 		}
-		.btn2 {
-			background: #007aff;
-			color: #fff;
-			margin-left: 24rpx;
-			height: 70rpx;
-			line-height: 70rpx;
-		}
 		.order-list {
 			background: rgb(249, 250, 251);
 			padding: 24rpx 24rpx 0;
 			margin-bottom: 24rpx;
+			max-height: 244rpx;
+			overflow-y: scroll;
 			.title {
 				margin-bottom: 24rpx;
 			}
@@ -614,6 +650,9 @@ export default {
 					margin-bottom: 24rpx;
 					margin-right: 24rpx;
 					display: inline-block;
+					:nth-child(4n) {
+						margin-right: 0;
+					}
 				}
 			}
 		}
