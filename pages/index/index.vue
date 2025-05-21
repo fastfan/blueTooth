@@ -2,7 +2,7 @@
 	<view class="container">
 		<view class="container-empty" :style="{ height: menuInfo.top + 'px' }"></view>
 		<view class="container-box" :style="{ height: menuInfo.height + 'px' }">
-			<uni-easyinput trim="all" v-model="inputValue" placeholder="请输入内容" @input="input"></uni-easyinput>
+			<uni-easyinput trim="all" v-model="inputValue" placeholder="请输入内容"></uni-easyinput>
 			<button
 				class="btn2"
 				size="mini"
@@ -535,6 +535,7 @@ export default {
 		},
 		// 发送指令
 		sendOrder(value) {
+			let myRe = /^AT\+[A-Za-z]+/
 			if (!value) {
 				uni.showToast({
 					title: '请输入指令！',
@@ -544,6 +545,12 @@ export default {
 			} else if (!this.connectedDevice.deviceId) {
 				uni.showToast({
 					title: '请连接设备！',
+					icon: 'none'
+				})
+				return
+			} else if (!myRe.test(value)) {
+				uni.showToast({
+					title: '指令格式不正确！',
 					icon: 'none'
 				})
 				return
