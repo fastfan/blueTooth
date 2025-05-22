@@ -41,7 +41,6 @@
 							<button
 								:style="{ background: item.status == 0 ? '#007aff' : '' }"
 								:type="item.status == 0 ? 'primary' : 'warn'"
-								size="mini"
 								@click="connectDevice(item)"
 							>
 								{{ item.status == 0 ? '连接' : '断开连接' }}
@@ -58,18 +57,13 @@
 				</view> -->
 				<view class="order-list">
 					<view class="title">常用查询</view>
-					<uni-tag
-						class="tag"
-						v-for="(item, index) in commonTag"
-						:key="item.text"
-						:text="item.text"
-						:inverted="true"
-						type="primary"
-						:circle="false"
-						@click="clickTag(item)"
-					></uni-tag>
+					<view class="list-cont2">
+						<view class="tag2" @click="clickTag(item)" v-for="(item, index) in commonTag" :key="item.value">
+							{{ item.text }}
+						</view>
+					</view>
 				</view>
-				<view class="order-list">
+				<!-- <view class="order-list">
 					<view class="title">快速设置</view>
 					<uni-tag
 						class="tag"
@@ -81,33 +75,41 @@
 						:circle="false"
 						@click="clickTag(item)"
 					></uni-tag>
-				</view>
+				</view> -->
 				<view class="order-list">
 					<view class="title">历史指令</view>
-					<view style="display: flex; flex-wrap: wrap">
-						<view
-							v-for="(item, index) in historyTag"
-							:key="item.text"
-							style="position: relative; margin-right: 0; margin-bottom: 0"
-						>
+					<view style="display: flex; flex-wrap: wrap" class="list-cont">
+						<view v-for="(item, index) in historyTag" :key="item" style="position: relative; margin-right: 0; margin-bottom: 0">
 							<uni-tag
 								class="tag"
-								:text="item.text"
+								:text="item"
 								:inverted="true"
 								type="default"
 								:circle="false"
 								@click="clickTag(item)"
+								style="margin-top: 20rpx"
 							></uni-tag>
 							<uni-icons
 								@click="deleteTag(index)"
 								type="clear"
 								size="20"
-								style="position: absolute; right: 2rpx; top: -20rpx"
+								style="position: absolute; right: 2rpx; top: -6rpx"
 							></uni-icons>
 						</view>
 					</view>
 				</view>
 				<view class="order-list-current">
+					<view style="width: 100%; text-align: right">
+						<button
+							class="btn2 btn3"
+							size="mini"
+							@click="clearOrder"
+							:style="{ height: menuInfo.height + 'px', lineHeight: menuInfo.height + 'px' }"
+						>
+							清除
+						</button>
+					</view>
+
 					<view class="item" v-for="(item, index) in orderList" :key="index">
 						<view class="time">{{ item.time }}</view>
 						<view class="contents">
@@ -216,12 +218,54 @@ export default {
 				}
 			],
 			commonTag: [
-				{ text: '查询IMEI', value: 'AT+IMEI?' },
-				{ text: '查询ICCID', value: 'AT+IMEI?' },
-				{ text: '固件版本', value: 'AT+WIFISCAN' },
-				{ text: '网络状态', value: 'AT+WIFISCAN' },
-				{ text: 'APN查询', value: 'AT+WIFISCAN' },
-				{ text: '服务器', value: 'AT+WIFISCAN' }
+				{ text: '启动产测', value: 'AT+PDTS' },
+				{ text: '恢复出厂', value: 'AT+RSTSP' },
+				{ text: '设备重启', value: 'AT+REBOOT' },
+				{ text: '设备关机', value: 'AT+PWSWST=0' },
+				{ text: 'PID 查询', value: 'AT+WRPID=?' },
+				{ text: 'ID 查询', value: 'AT+DEVEUI=?' },
+				{ text: '固件查询', value: 'AT+DEVINFO=?' },
+				{ text: 'ICCID查询', value: 'AT+ICCID=?' },
+				{ text: 'RTC查询', value: 'AT+DATETIME=?' },
+				{ text: '电压查询', value: 'AT+BATVOL=?' },
+				{ text: '门限查询', value: 'AT+ACCTHRE=?' },
+				{ text: '网络查询', value: 'AT+STATUS=?' },
+				{ text: 'wifi查询', value: 'AT+WFFCONF=?' },
+				{ text: 'wifi设置', value: 'AT+WFFCONF=4,2,-91' },
+				{ text: '联网', value: 'AT+ENNBRP' },
+				{ text: '定位', value: 'AT+ENGNBRP' },
+				{ text: '实时模式', value: 'AT+SPTAR=0,3,60,2' },
+				{ text: '普通模式', value: 'AT+SPTAR=1,3,60,2' },
+				{ text: '紧跟模式', value: 'AT+SPTAR=2,3,60,2' },
+				{ text: '5分钟', value: 'AT+SPTAR=0,3,300,2' },
+				{ text: '省电模式', value: 'AT+SPTAR=0,3,1800,2' },
+				{ text: '纯GPS', value: 'AT+SPTAR=0,1,60,2' },
+				{ text: '纯wifi', value: 'AT+SPTAR=0,2,60,2' },
+				{ text: '固定30分', value: 'AT+SPTAR=4,3,1800,2' },
+				{ text: '读取日志', value: 'AT+RAULOG' },
+				{ text: '日志开启', value: 'AT+ENFPRT=1' },
+				{ text: '日志清理', value: 'AT+RAULOG=2' },
+				{ text: '日志关闭', value: 'AT+ENFPRT=0' },
+				{ text: 'PK 查询', value: 'AT+WRPKPS=?' },
+				{ text: '固件查询', value: 'AT+NBATCMD=AT+QGMR' },
+				{ text: 'CATM 信号', value: 'AT+NBATCMD=AT+CSQ' },
+				{ text: 'CATM 网络', value: 'AT+NETSEL=?' },
+				{ text: 'APN 配置', value: 'AT+APNCONF=?' },
+				{ text: '数据选择', value: 'AT+IOTSER=?' },
+				{ text: '服务器', value: 'AT+NBATCMD=AT+QIOTCFG="server"' },
+				{ text: '查看秘钥', value: 'AT+NBATCMD=AT+QIOTCFG="productinfo"' },
+				{ text: '搜网顺序', value: 'AT+NETSEL=0' },
+				{ text: '网络查询', value: 'AT+NETSEL=?' },
+				{ text: 'NB 模式', value: 'AT+NETSEL=1' },
+				{ text: 'CATM模式', value: 'AT+NETSEL=2' },
+				{ text: '国内', value: 'AT+IOTSER=1' },
+				{ text: '欧洲', value: 'AT+IOTSER=2' },
+				{ text: '美国', value: 'AT+IOTSER=3' },
+				{ text: '查看APN', value: 'AT+NBATCMD=AT+CGDCONT?' },
+				{ text: '模式查询', value: 'AT+NBATCMD=AT+QCFG="iotopmode"' },
+				{ text: '搜网模式', value: 'AT+NBATCMD=AT+QCFG="nwscanmode",0' },
+				{ text: '搜网查询', value: 'AT+NBATCMD=AT+QCFG="nwscanseq"' },
+				{ text: '搜网顺序', value: 'AT+NBATCMD=AT+QCFG="nwscanseq",020103、AT+NBATCMD=AT+QCFG="nwscanseq",010203' }
 			],
 			easyTag: [
 				{ text: 'WIFI定位', value: 'AT+IMEI?' },
@@ -230,13 +274,7 @@ export default {
 				{ text: '设备重启', value: 'AT+IMEI?' },
 				{ text: '恢复出厂', value: 'AT+IMEI?' }
 			],
-			historyTag: [
-				{ text: 'AT+IMEI?', value: 'AT+IMEI?' },
-				{ text: 'AT+CSQ?', value: 'AT+CSQ?' },
-				{ text: 'AT+RESET', value: 'AT+RESET' },
-				{ text: 'AT+APN?', value: 'AT+APN?' },
-				{ text: 'AT+WIFISCAN', value: 'AT+WIFISCAN' }
-			],
+			historyTag: [],
 			progress: '70%',
 			searchValue: '',
 			recordValue: 0,
@@ -270,6 +308,9 @@ export default {
 		}
 	},
 	methods: {
+		clearOrder() {
+			this.orderList = []
+		},
 		onClickItem(e) {
 			if (this.current !== e.currentIndex) {
 				this.current = e.currentIndex
@@ -559,9 +600,29 @@ export default {
 				title: '发送成功',
 				icon: 'success'
 			})
+			this.historyTag.push(value)
+			const uniqueArray = [...new Set(this.historyTag)]
+			uni.setStorageSync('historyTag', uniqueArray)
+			this.orderList.push({ time: this.transTime(), type: 'send', anser: value })
 		},
 		clickTag(item) {
 			this.sendOrder(item.value)
+		},
+		transTime() {
+			var date = new Date()
+			let y = date.getFullYear()
+			let m = date.getMonth() + 1
+			m = m < 10 ? '0' + m : m
+			let d = date.getDate()
+			d = d < 10 ? '0' + d : d
+			let h = date.getHours()
+			h = h < 10 ? '0' + h : h
+			let M = date.getMinutes()
+			M = M < 10 ? '0' + M : M
+			let s = date.getSeconds()
+			s = s < 10 ? '0' + s : s
+			let dateTime = y + '-' + m + '-' + d + ' ' + h + ':' + M + ':' + s
+			return dateTime
 		},
 		startLevel() {
 			uni.showToast({
@@ -577,6 +638,11 @@ export default {
 		deleteTag(index) {
 			this.historyTag.splice(index, 1)
 		}
+	},
+	onLoad() {
+		const historyTag = uni.getStorageSync('historyTag')
+		if (!historyTag) return
+		this.historyTag = historyTag
 	}
 }
 </script>
@@ -602,6 +668,9 @@ export default {
 		height: 32px;
 		line-height: 32px;
 	}
+	.btn3 {
+		background: orangered;
+	}
 	.title-content {
 		display: flex;
 		align-items: center;
@@ -621,7 +690,8 @@ export default {
 				padding: 24rpx;
 				border-radius: 24rpx;
 				.button {
-					text-align: right;
+					text-align: center;
+					margin-top: 20rpx;
 				}
 			}
 		}
@@ -647,25 +717,46 @@ export default {
 			background: rgb(249, 250, 251);
 			padding: 24rpx 24rpx 0;
 			margin-bottom: 24rpx;
-			max-height: 244rpx;
-			overflow-y: scroll;
+			.list-cont {
+				max-height: 160rpx;
+				overflow-y: scroll;
+			}
+			.list-cont2 {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+				max-height: 160rpx;
+				overflow-y: scroll;
+			}
 			.title {
 				margin-bottom: 24rpx;
 			}
 			.tag {
-				.uni-tag {
-					margin-bottom: 24rpx;
-					margin-right: 24rpx;
-					display: inline-block;
-					:nth-child(4n) {
-						margin-right: 0;
-					}
+				margin-bottom: 24rpx;
+				margin-right: 24rpx;
+				display: inline-block;
+				:nth-child(4n) {
+					margin-right: 0;
 				}
+			}
+			.tag2 {
+				width: calc(100% / 4 - 16rpx);
+				margin-bottom: 12rpx;
+				margin-right: 12rpx;
+				border: 1px solid #007aff;
+				height: 32rpx;
+				line-height: 32rpx;
+				text-align: center;
+				padding: 10rpx 0;
+				border-radius: 8rpx;
+				color: #007aff;
 			}
 		}
 		.order-list-current {
 			background: #fff;
 			padding: 24rpx;
+			height: 600rpx;
+			overflow-y: scroll;
 			.item {
 				margin-bottom: 12rpx;
 				.time {
