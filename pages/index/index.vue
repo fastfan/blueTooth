@@ -89,12 +89,7 @@
 								@click="clickTag(item)"
 								style="margin-top: 20rpx"
 							></uni-tag>
-							<uni-icons
-								@click="deleteTag(index)"
-								type="clear"
-								size="20"
-								style="position: absolute; right: 2rpx; top: -6rpx"
-							></uni-icons>
+							<uni-icons @click="deleteTag(index)" type="clear" size="20" style="position: absolute; right: 2rpx; top: -6rpx"></uni-icons>
 						</view>
 					</view>
 				</view>
@@ -151,12 +146,7 @@
 						<uni-datetime-picker class="search-item" v-model="rangeTime" type="daterange" @maskClick="maskClick" />
 					</view>
 					<view class="search-bar">
-						<uni-data-select
-							class="search-item"
-							v-model="recordValue"
-							:localdata="range"
-							@change="recordChange"
-						></uni-data-select>
+						<uni-data-select class="search-item" v-model="recordValue" :localdata="range" @change="recordChange"></uni-data-select>
 						<uni-search-bar
 							class="search-item"
 							radius="5"
@@ -498,37 +488,61 @@ export default {
 			})
 		},
 		// 【8】发送数据
-		send() {
+		send(value) {
 			// 从微信小程序 提供的蓝牙api 来看
 			// uni.writeBLECharacteristicValue：向低功耗蓝牙设备特征值中写入二进制数据，这个 api 是可以发送一些数据给蓝牙设备，但发送的值要转成 ArrayBuffer 。
 			// 向蓝牙设备发送一个0x00的16进制数据
-			let msg = 'hello'
-			const buffer = new ArrayBuffer(msg.length)
-			const dataView = new DataView(buffer)
-			// dataView.setUint8(0, 0)
-			for (var i = 0; i < msg.length; i++) {
-				dataView.setUint8(i, msg.charAt(i).charCodeAt())
-			}
-			uni.writeBLECharacteristicValue({
-				deviceId: this.connectedDevice.deviceId, // 设备ID
-				serviceId: '0000FFE0-0000-1000-8000-00805F9B34FB', // 服务UUID
-				characteristicId: '0000FFE1-0000-1000-8000-00805F9B34FB', // 特征值
-				value: buffer,
-				success(res) {
-					console.log('writeBLECharacteristicValue success', res.errMsg)
-					//数据向外成功发送了，但不代表设备一定就收到了。通常设备收到你发送过去的信息，会返回一条消息给你，而这个回调消息会在 uni.onBLECharacteristicValueChange 触发，但这是蓝牙设备那边控制的，需要设备那边给回馈
-					uni.showToast({
-						title: 'write指令发送成功'
-					})
-				},
-				fail(err) {
-					console.error(err)
-					uni.showToast({
-						title: 'write指令发送失败',
-						icon: 'error'
-					})
+			if (value) {
+				let msg = value
+				uni.writeBLECharacteristicValue({
+					deviceId: this.connectedDevice.deviceId, // 设备ID
+					serviceId: '0000FFE0-0000-1000-8000-00805F9B34FB', // 服务UUID
+					characteristicId: '0000FFE1-0000-1000-8000-00805F9B34FB', // 特征值
+					value: buffer,
+					success(res) {
+						console.log('writeBLECharacteristicValue success', res.errMsg)
+						//数据向外成功发送了，但不代表设备一定就收到了。通常设备收到你发送过去的信息，会返回一条消息给你，而这个回调消息会在 uni.onBLECharacteristicValueChange 触发，但这是蓝牙设备那边控制的，需要设备那边给回馈
+						uni.showToast({
+							title: 'write指令发送成功'
+						})
+					},
+					fail(err) {
+						console.error(err)
+						uni.showToast({
+							title: 'write指令发送失败',
+							icon: 'error'
+						})
+					}
+				})
+			} else {
+				let msg = ''
+				const buffer = new ArrayBuffer(msg.length)
+				const dataView = new DataView(buffer)
+				// dataView.setUint8(0, 0)
+				for (var i = 0; i < msg.length; i++) {
+					dataView.setUint8(i, msg.charAt(i).charCodeAt())
 				}
-			})
+				uni.writeBLECharacteristicValue({
+					deviceId: this.connectedDevice.deviceId, // 设备ID
+					serviceId: '0000FFE0-0000-1000-8000-00805F9B34FB', // 服务UUID
+					characteristicId: '0000FFE1-0000-1000-8000-00805F9B34FB', // 特征值
+					value: buffer,
+					success(res) {
+						console.log('writeBLECharacteristicValue success', res.errMsg)
+						//数据向外成功发送了，但不代表设备一定就收到了。通常设备收到你发送过去的信息，会返回一条消息给你，而这个回调消息会在 uni.onBLECharacteristicValueChange 触发，但这是蓝牙设备那边控制的，需要设备那边给回馈
+						uni.showToast({
+							title: 'write指令发送成功'
+						})
+					},
+					fail(err) {
+						console.error(err)
+						uni.showToast({
+							title: 'write指令发送失败',
+							icon: 'error'
+						})
+					}
+				})
+			}
 		},
 		// 【9】读取数据
 		read() {
@@ -548,6 +562,22 @@ export default {
 						title: 'read指令发送失败',
 						icon: 'error'
 					})
+				}
+			})
+		},
+		// 设置ble MTU大小，设置为247即可
+		setBleSize() {
+			const value = '41 54 2B 48 45 58 44 3D 55 AA 00 0C 00 08 00 00 13 CF C2 0A 5F BB DB 0D 0A'
+			const _that = this
+			uni.setBLEMTU({
+				deviceId: this.connectedDevice.deviceId,
+				mtu: 247, // 设置更大 MTU（根据设备支持的最大值）
+				success(res) {
+					console.log('MTU 设置成功:', res.mtu)
+					_that.send(value)
+				},
+				fail(err) {
+					console.error('MTU 设置失败', err)
 				}
 			})
 		},
@@ -629,6 +659,7 @@ export default {
 				title: '开始升级',
 				icon: 'none'
 			})
+			this.setBleSize()
 		},
 		search() {},
 		recordChange() {},
