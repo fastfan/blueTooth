@@ -2,7 +2,7 @@
 	<view class="container">
 		<view class="container-empty" :style="{ height: menuInfo.top + 'px' }"></view>
 		<view class="container-box" :style="{ height: menuInfo.height + 'px' }">
-			<uni-easyinput trim="all" v-model="inputValue" placeholder="请输入内容"></uni-easyinput>
+			<!-- <uni-easyinput trim="all" v-model="inputValue" placeholder="请输入内容"></uni-easyinput>
 			<button
 				class="btn2"
 				size="mini"
@@ -10,10 +10,17 @@
 				:style="{ height: menuInfo.height + 'px', lineHeight: menuInfo.height + 'px' }"
 			>
 				发送
-			</button>
+			</button> -->
+			<uni-data-select
+				style="width: 206rpx"
+				:clear="false"
+				v-model="languageValue"
+				:localdata="languageRange"
+				@change="languageChange"
+			></uni-data-select>
 			<view :style="{ width: menuInfo.width + 'px', height: menuInfo.height + 'px' }"></view>
 		</view>
-		<view class="title-content">当前链接：{{ connectedDevice.name ? connectedDevice.name : '' }}</view>
+		<view class="title-content">{{ $t('Scan Device') }}：{{ connectedDevice.name ? connectedDevice.name : '' }}</view>
 		<view class="uni-padding-wrap uni-common-mt">
 			<uni-segmented-control
 				:current="current"
@@ -25,16 +32,16 @@
 		</view>
 		<view class="content">
 			<view v-show="current === 0" class="tab-one">
-				<button type="primary" class="btn" @click="startScan">扫描设备</button>
+				<button type="primary" class="btn" @click="startScan">{{ $t('Device Connection') }}</button>
 				<view class="tab-one-list">
 					<view class="list-item" v-for="(item, index) in devices" :key="index">
-						<view class="name">设备&nbsp;名称：{{ item.name }}</view>
-						<view class="name">MAC地址：{{ item.deviceId }}</view>
-						<view class="name">信号&nbsp;强度：{{ item.RSSI }}</view>
+						<view class="name">{{ $t('Device') }}&nbsp;{{ $t('Name') }}：{{ item.name }}</view>
+						<view class="name">MAC{{ $t('Address') }}：{{ item.deviceId }}</view>
+						<view class="name">{{ $t('Signal') }}&nbsp;{{ $t('Strength') }}：{{ item.RSSI }}</view>
 						<view class="color">
-							状&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;态：
+							{{ $t('Status') }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;：
 							<text :style="{ color: item.status == 0 ? '#666' : 'rgb(34 197 93)' }">
-								{{ item.status == 0 ? '未连接' : '已连接' }}
+								{{ item.status == 0 ? $t('UnConnection') : $t('Connected') }}
 							</text>
 						</view>
 						<view class="button">
@@ -43,20 +50,16 @@
 								:type="item.status == 0 ? 'primary' : 'warn'"
 								@click="connectDevice(item)"
 							>
-								{{ item.status == 0 ? '连接' : '断开连接' }}
+								{{ item.status == 0 ? $t('Connect') : $t('Break Connect') }}
 							</button>
 						</view>
 					</view>
 				</view>
 			</view>
 			<view v-show="current === 1" class="tab-two">
-				<view class="order-title">AT 指令调试</view>
-				<!-- <view class="order-content">
-					<uni-easyinput trim="all" v-model="inputValue" placeholder="请输入内容" @input="input"></uni-easyinput>
-					<button class="btn2" size="mini" @click="sendOrder(inputValue)">发送</button>
-				</view> -->
+				<view class="order-title">AT {{ $t('Order') }}</view>
 				<view class="order-list">
-					<view class="title">常用查询</view>
+					<view class="title">{{ $t('Comoon') }}{{ $t('Order') }}</view>
 					<view class="list-cont2">
 						<view class="tag2" @click="clickTag(item)" v-for="(item, index) in commonTag" :key="item.value">
 							{{ item.text }}
@@ -77,7 +80,7 @@
 					></uni-tag>
 				</view> -->
 				<view class="order-list">
-					<view class="title">历史指令</view>
+					<view class="title">{{ $t('History') }}{{ $t('Order') }}</view>
 					<view style="display: flex; flex-wrap: wrap" class="list-cont">
 						<view v-for="(item, index) in historyTag" :key="item" style="position: relative; margin-right: 0; margin-bottom: 0">
 							<uni-tag
@@ -89,12 +92,29 @@
 								@click="clickTag(item)"
 								style="margin-top: 20rpx"
 							></uni-tag>
-							<uni-icons @click="deleteTag(index)" type="clear" size="20" style="position: absolute; right: 2rpx; top: -6rpx"></uni-icons>
+							<uni-icons
+								@click="deleteTag(index)"
+								type="clear"
+								size="20"
+								style="position: absolute; right: 2rpx; top: -6rpx"
+							></uni-icons>
 						</view>
 					</view>
 				</view>
+				<view class="order-content">
+					<uni-easyinput trim="all" v-model="inputValue" placeholder="请输入" @input="input"></uni-easyinput>
+					<button class="btn2" size="mini" @click="sendOrder(inputValue)">{{ $t('Send') }}</button>
+					<button
+						class="btn2 btn3"
+						size="mini"
+						@click="clearOrder"
+						:style="{ height: menuInfo.height + 'px', lineHeight: menuInfo.height + 'px' }"
+					>
+						{{ $t('Clear') }}
+					</button>
+				</view>
 				<view class="order-list-current">
-					<view style="width: 100%; text-align: right">
+					<!-- <view style="width: 100%; text-align: right">
 						<button
 							class="btn2 btn3"
 							size="mini"
@@ -103,13 +123,13 @@
 						>
 							清除
 						</button>
-					</view>
+					</view> -->
 
 					<view class="item" v-for="(item, index) in orderList" :key="index">
 						<view class="time">{{ item.time }}</view>
 						<view class="contents">
 							<view class="type" :style="{ background: item.type == 'send' ? '#007aff' : 'rgb(34,197,94)' }">
-								{{ item.type == 'send' ? '发送' : '接收' }}
+								{{ item.type == 'send' ? $t('Send') : $t('Receive') }}
 							</view>
 							<view class="anser">{{ item.anser }}</view>
 						</view>
@@ -118,17 +138,17 @@
 			</view>
 			<view v-show="current === 2">
 				<view class="order-list">
-					<view class="title">OTA升级</view>
+					<view class="title">{{ $t('OTA Upgrade') }}</view>
 					<view class="ota">
 						<view class="ota-item">
-							<view>当前版本</view>
+							<view>{{ $t('Current') }}{{ $t('Version') }}</view>
 							<view>v1.2.3</view>
 						</view>
 						<view class="ota-item">
-							<view>最新版本</view>
+							<view>{{ $t('Latest') }}{{ $t('Version') }}</view>
 							<view>v1.2.4</view>
 						</view>
-						<button class="btn2" size="mini" @click="startLevel">开始升级</button>
+						<button class="btn2" size="mini" @click="startLevel">{{ $t('Start ') }}{{ $t('Upgrade') }}</button>
 					</view>
 					<view class="progress">
 						<view class="process-line">
@@ -141,16 +161,21 @@
 			</view>
 			<view v-show="current === 3">
 				<view class="order-list" style="background: #fff; padding-bottom: 24rpx; max-height: 600rpx">
-					<view class="title">日志记录</view>
+					<view class="title">{{ $t('Log recording') }}</view>
 					<view class="search-bar">
 						<uni-datetime-picker class="search-item" v-model="rangeTime" type="daterange" @maskClick="maskClick" />
 					</view>
 					<view class="search-bar">
-						<uni-data-select class="search-item" v-model="recordValue" :localdata="range" @change="recordChange"></uni-data-select>
+						<uni-data-select
+							class="search-item"
+							v-model="recordValue"
+							:localdata="range"
+							@change="recordChange"
+						></uni-data-select>
 						<uni-search-bar
 							class="search-item"
 							radius="5"
-							placeholder="自动显示隐藏"
+							placeholder=""
 							clearButton="auto"
 							cancelButton="none"
 							@confirm="search"
@@ -159,10 +184,10 @@
 					</view>
 					<uni-table ref="table" border stripe emptyText="暂无更多数据">
 						<uni-tr>
-							<uni-th align="center">时间</uni-th>
-							<uni-th align="center">类型</uni-th>
-							<uni-th align="center">内容</uni-th>
-							<uni-th align="center">状态</uni-th>
+							<uni-th align="center">{{ $t('Time') }}</uni-th>
+							<uni-th align="center">{{ $t('Type') }}</uni-th>
+							<uni-th align="center">{{ $t('Content') }}</uni-th>
+							<uni-th align="center">{{ $t('Status') }}</uni-th>
 						</uni-tr>
 						<uni-tr v-for="(item, index) in tableData" :key="index">
 							<uni-td>{{ item.date }}</uni-td>
@@ -186,9 +211,14 @@ import { bluetoothInitCode, ab2hex, hexCharCodeToStr } from '@/utils/util.js'
 export default {
 	data() {
 		return {
+			languageValue: 0,
+			languageRange: [
+				{ value: 0, text: '简体中文' },
+				{ value: 1, text: 'English' }
+			],
 			menuInfo: uni.getMenuButtonBoundingClientRect(),
 			current: 0,
-			items: ['设备连接', 'AT指令', 'OTA升级', '日志记录'],
+			items: ['设备连接', 'AT 指令', 'OTA 升级', '日志记录'],
 			activeColor: '#007aff',
 			styleType: 'button',
 			devices: [], // 设备列表
@@ -297,7 +327,44 @@ export default {
 			]
 		}
 	},
+	computed: {
+		$t() {
+			return function (key) {
+				const lang = this.$root.lang
+				// 根据当前语言从语言包文件中获取对应的翻译内容
+				let translations = {}
+				try {
+					translations = require(`../../static/${lang}.json`)
+				} catch (e) {
+					console.warn(`Translation file not found for language: ${lang}`)
+				}
+				return translations[key] || ''
+			}
+		}
+	},
 	methods: {
+		// 获取翻译内容
+		languageChange(e) {
+			console.log('e::::', e)
+			// 切换语言
+			// 切换为另一种语言
+			this.$root.lang = e == 1 ? 'en-US' : 'zh-CN'
+			this.items = e == 1 ? ['DeviceConect', 'AT Order', 'OTAUpgrade', 'Logrecord'] : ['设备连接', 'AT 指令', 'OTA 升级', '日志记录']
+			this.range =
+				e == 1
+					? [
+							{ value: 0, text: 'All Type' },
+							{ value: 1, text: 'Deviice Log' },
+							{ value: 2, text: 'Order Log' },
+							{ value: 3, text: 'Upgrade Log' }
+					  ]
+					: [
+							{ value: 0, text: '全部类型' },
+							{ value: 1, text: '连接日志' },
+							{ value: 2, text: '指令日志' },
+							{ value: 3, text: '升级日志' }
+					  ]
+		},
 		clearOrder() {
 			this.orderList = []
 		},
@@ -671,9 +738,18 @@ export default {
 		}
 	},
 	onLoad() {
-		const historyTag = uni.getStorageSync('historyTag')
-		if (!historyTag) return
-		this.historyTag = historyTag
+		// const historyTag = uni.getStorageSync('historyTag')
+		// if (!historyTag) return
+		// this.historyTag = historyTag
+
+		const aaa = this.commonTag.map((_tt) => {
+			return _tt.text
+		})
+		const bbb = []
+		aaa.map((_mm) => {
+			bbb.push(_mm)
+		})
+		console.log(JSON.stringify(bbb))
 	}
 }
 </script>
