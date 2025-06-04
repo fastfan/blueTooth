@@ -656,6 +656,11 @@ export default {
 						title: bluetoothInitCode.get(err.errCode),
 						icon: 'error'
 					})
+					if (err.errCode == 10006) {
+						_this.connectedDevice = {}
+						device.status = 0
+						uni.removeStorageSync('deviceId')
+					}
 				}
 			})
 		},
