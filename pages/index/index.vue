@@ -32,7 +32,7 @@
 		</view>
 		<view class="content">
 			<view v-show="current === 0" class="tab-one">
-				<button type="primary" class="btn" @click="startScan">{{ $t('Device Connection') }}</button>
+				<button type="primary" class="btn" @click="startScan">{{ $t('Connect') }}</button>
 				<view class="tab-one-list">
 					<view class="list-item" v-for="(item, index) in devices" :key="index">
 						<view class="name">{{ $t('Device') }}&nbsp;{{ $t('Name') }}：{{ item.name }}</view>
@@ -50,7 +50,7 @@
 								:type="item.status == 0 ? 'primary' : 'warn'"
 								@click="connectDevice(item)"
 							>
-								{{ item.status == 0 ? $t('Connect') : $t('Break Connect') }}
+								{{ item.status == 0 ? $t('Connects') : $t('Break Connect') }}
 							</button>
 						</view>
 					</view>
@@ -61,7 +61,12 @@
 				<view class="order-list">
 					<view class="title">{{ $t('Comoon') }}{{ $t('Order') }}</view>
 					<view class="list-cont2">
-						<view class="tag2" @click="clickTag(item)" v-for="(item, index) in commonTag" :key="item.value">
+						<view
+							:class="[languageValue == 0 ? 'tag2' : 'tag3']"
+							@click="clickTag(item)"
+							v-for="(item, index) in commonTag"
+							:key="item.value"
+						>
 							{{ item.text }}
 						</view>
 					</view>
@@ -138,7 +143,7 @@
 			</view>
 			<view v-show="current === 2">
 				<view class="order-list">
-					<view class="title">{{ $t('OTA Upgrade') }}</view>
+					<view class="title">{{ $t('Update') }}</view>
 					<view class="ota">
 						<view class="ota-item">
 							<view>{{ $t('Current') }}{{ $t('Version') }}</view>
@@ -161,7 +166,7 @@
 			</view>
 			<view v-show="current === 3">
 				<view class="order-list" style="background: #fff; padding-bottom: 24rpx; max-height: 600rpx">
-					<view class="title">{{ $t('Log recording') }}</view>
+					<view class="title">{{ $t('Log') }}</view>
 					<view class="search-bar">
 						<uni-datetime-picker class="search-item" v-model="rangeTime" type="daterange" @maskClick="maskClick" />
 					</view>
@@ -208,6 +213,7 @@
 
 <script>
 import { bluetoothInitCode, ab2hex, hexCharCodeToStr } from '@/utils/util.js'
+import { orderList, orderList2 } from '../../static/data'
 export default {
 	data() {
 		return {
@@ -237,56 +243,7 @@ export default {
 					anser: 'STATUS: ONLINE, BATTERY: 85%, GPS: FIXED'
 				}
 			],
-			commonTag: [
-				{ text: '启动产测', value: 'AT+PDTS' },
-				{ text: '恢复出厂', value: 'AT+RSTSP' },
-				{ text: '设备重启', value: 'AT+REBOOT' },
-				{ text: '设备关机', value: 'AT+PWSWST=0' },
-				{ text: 'PID 查询', value: 'AT+WRPID=?' },
-				{ text: 'ID 查询', value: 'AT+DEVEUI=?' },
-				{ text: '固件查询', value: 'AT+DEVINFO=?' },
-				{ text: 'ICCID查询', value: 'AT+ICCID=?' },
-				{ text: 'RTC查询', value: 'AT+DATETIME=?' },
-				{ text: '电压查询', value: 'AT+BATVOL=?' },
-				{ text: '门限查询', value: 'AT+ACCTHRE=?' },
-				{ text: '网络查询', value: 'AT+STATUS=?' },
-				{ text: 'wifi查询', value: 'AT+WFFCONF=?' },
-				{ text: 'wifi设置', value: 'AT+WFFCONF=4,2,-91' },
-				{ text: '联网', value: 'AT+ENNBRP' },
-				{ text: '定位', value: 'AT+ENGNBRP' },
-				{ text: '实时模式', value: 'AT+SPTAR=0,3,60,2' },
-				{ text: '普通模式', value: 'AT+SPTAR=1,3,60,2' },
-				{ text: '紧跟模式', value: 'AT+SPTAR=2,3,60,2' },
-				{ text: '5分钟', value: 'AT+SPTAR=0,3,300,2' },
-				{ text: '省电模式', value: 'AT+SPTAR=0,3,1800,2' },
-				{ text: '纯GPS', value: 'AT+SPTAR=0,1,60,2' },
-				{ text: '纯wifi', value: 'AT+SPTAR=0,2,60,2' },
-				{ text: '固定30分', value: 'AT+SPTAR=4,3,1800,2' },
-				{ text: '读取日志', value: 'AT+RAULOG' },
-				{ text: '日志开启', value: 'AT+ENFPRT=1' },
-				{ text: '日志清理', value: 'AT+RAULOG=2' },
-				{ text: '日志关闭', value: 'AT+ENFPRT=0' },
-				{ text: 'PK 查询', value: 'AT+WRPKPS=?' },
-				{ text: '固件查询', value: 'AT+NBATCMD=AT+QGMR' },
-				{ text: 'CATM 信号', value: 'AT+NBATCMD=AT+CSQ' },
-				{ text: 'CATM 网络', value: 'AT+NETSEL=?' },
-				{ text: 'APN 配置', value: 'AT+APNCONF=?' },
-				{ text: '数据选择', value: 'AT+IOTSER=?' },
-				{ text: '服务器', value: 'AT+NBATCMD=AT+QIOTCFG="server"' },
-				{ text: '查看秘钥', value: 'AT+NBATCMD=AT+QIOTCFG="productinfo"' },
-				{ text: '搜网顺序', value: 'AT+NETSEL=0' },
-				{ text: '网络查询', value: 'AT+NETSEL=?' },
-				{ text: 'NB 模式', value: 'AT+NETSEL=1' },
-				{ text: 'CATM模式', value: 'AT+NETSEL=2' },
-				{ text: '国内', value: 'AT+IOTSER=1' },
-				{ text: '欧洲', value: 'AT+IOTSER=2' },
-				{ text: '美国', value: 'AT+IOTSER=3' },
-				{ text: '查看APN', value: 'AT+NBATCMD=AT+CGDCONT?' },
-				{ text: '模式查询', value: 'AT+NBATCMD=AT+QCFG="iotopmode"' },
-				{ text: '搜网模式', value: 'AT+NBATCMD=AT+QCFG="nwscanmode",0' },
-				{ text: '搜网查询', value: 'AT+NBATCMD=AT+QCFG="nwscanseq"' },
-				{ text: '搜网顺序', value: 'AT+NBATCMD=AT+QCFG="nwscanseq",020103、AT+NBATCMD=AT+QCFG="nwscanseq",010203' }
-			],
+			commonTag: orderList2,
 			easyTag: [
 				{ text: 'WIFI定位', value: 'AT+IMEI?' },
 				{ text: 'GPS定位', value: 'AT+IMEI?' },
@@ -349,7 +306,8 @@ export default {
 			// 切换语言
 			// 切换为另一种语言
 			this.$root.lang = e == 1 ? 'en-US' : 'zh-CN'
-			this.items = e == 1 ? ['DeviceConect', 'AT Order', 'OTAUpgrade', 'Logrecord'] : ['设备连接', 'AT 指令', 'OTA 升级', '日志记录']
+			this.items = e == 1 ? ['Connect', 'AT Order', 'Update', 'Log'] : ['设备连接', 'AT 指令', 'OTA 升级', '日志记录']
+			this.commonTag = e == 1 ? orderList : orderList2
 			this.range =
 				e == 1
 					? [
@@ -848,6 +806,21 @@ export default {
 			}
 			.tag2 {
 				width: calc(100% / 4 - 16rpx);
+				margin-bottom: 12rpx;
+				margin-right: 12rpx;
+				border: 1px solid #007aff;
+				height: 32rpx;
+				line-height: 32rpx;
+				text-align: center;
+				padding: 10rpx 0;
+				border-radius: 8rpx;
+				color: #007aff;
+				:nth-child(2n) {
+					margin-right: 0;
+				}
+			}
+			.tag3 {
+				width: calc(100% / 2 - 16rpx);
 				margin-bottom: 12rpx;
 				margin-right: 12rpx;
 				border: 1px solid #007aff;

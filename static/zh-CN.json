@@ -1,9 +1,9 @@
 {
 	"Current Connection": "当前连接",
-	"Device Connection": "设备连接",
+	"Connect": "设备连接",
 	"AT Order": "AT 指令",
-	"OTA Upgrade": "OTA 升级",
-	"Log recording": "日志记录",
+	"Update": "OTA 升级",
+	"Log": "日志记录",
 	"Send": "发送",
 	"Receive": "接收",
 	"Scan Device": "扫描设备",
