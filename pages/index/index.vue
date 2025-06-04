@@ -20,7 +20,7 @@
 			></uni-data-select>
 			<view :style="{ width: menuInfo.width + 'px', height: menuInfo.height + 'px' }"></view>
 		</view>
-		<view class="title-content">{{ $t('Scan Device') }}：{{ connectedDevice.name ? connectedDevice.name : '' }}</view>
+		<view class="title-content">{{ $t('Current Connection') }}：{{ connectedDevice.name ? connectedDevice.name : '' }}</view>
 		<view class="uni-padding-wrap uni-common-mt">
 			<uni-segmented-control
 				:current="current"
@@ -32,7 +32,19 @@
 		</view>
 		<view class="content">
 			<view v-show="current === 0" class="tab-one">
-				<button type="primary" class="btn" @click="startScan">{{ $t('Connect') }}</button>
+				<view class="search-con">
+					<view class="search-con-left">
+						<uni-easyinput
+							trim="all"
+							v-model="searchValue"
+							@clear="clearName"
+							placeholder="请输入设备名称"
+							@input="input"
+						></uni-easyinput>
+						<button class="btn2" size="mini" @click="searchMethod">{{ $t('Search') }}</button>
+					</view>
+					<button type="primary" size="mini" class="btn2" @click="startScan">{{ $t('Scan Device') }}</button>
+				</view>
 				<view class="tab-one-list">
 					<view class="list-item" v-for="(item, index) in devices" :key="index">
 						<view class="name">{{ $t('Device') }}&nbsp;{{ $t('Name') }}：{{ item.name }}</view>
@@ -231,6 +243,7 @@ export default {
 			connectedDevice: {},
 			services: [], // 设备服务列表
 			inputValue: '',
+			searchValue: '',
 			orderList: [
 				{
 					time: '2025.05.17 14:00:00',
@@ -300,6 +313,23 @@ export default {
 		}
 	},
 	methods: {
+		searchMethod() {
+			if (this.devices.length == 0) {
+				uni.showToast({ title: '请先扫描设备', icon: 'none' })
+				return
+			}
+			if (!this.searchValue) {
+				uni.showToast({ title: '请输入设备名称', icon: 'none' })
+				return
+			}
+			const deviceList = this.devices.filter((item) => item.name.toLowerCase().includes(this.searchValue.toLowerCase()))
+			this.devices = deviceList
+			if (this.devices.length == 0) uni.showToast({ title: '未查询到设备', icon: 'none' })
+		},
+		clearName() {
+			uni.stopBluetoothDevicesDiscovery()
+			this.startScan()
+		},
 		// 获取翻译内容
 		languageChange(e) {
 			console.log('e::::', e)
@@ -361,7 +391,7 @@ export default {
 				fail(err) {
 					console.error('蓝牙初始化失败', err)
 					uni.showToast({
-						title: bluetoothInitCode.get(err.errCode),
+						title: err.errMsg,
 						icon: 'none'
 					})
 				}
@@ -696,18 +726,9 @@ export default {
 		}
 	},
 	onLoad() {
-		// const historyTag = uni.getStorageSync('historyTag')
-		// if (!historyTag) return
-		// this.historyTag = historyTag
-
-		const aaa = this.commonTag.map((_tt) => {
-			return _tt.text
-		})
-		const bbb = []
-		aaa.map((_mm) => {
-			bbb.push(_mm)
-		})
-		console.log(JSON.stringify(bbb))
+		const historyTag = uni.getStorageSync('historyTag')
+		if (!historyTag) return
+		this.historyTag = historyTag
 	}
 }
 </script>
@@ -746,6 +767,16 @@ export default {
 	}
 	.content {
 		margin-top: 20rpx;
+		.search-con {
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 24rpx;
+		}
+		.search-con-left {
+			display: flex;
+			justify-content: space-between;
+			flex: 1;
+		}
 		.tab-one-list {
 			overflow-y: scroll;
 			height: 1050rpx;
