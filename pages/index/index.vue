@@ -355,10 +355,10 @@ export default {
 			let that = this
 			that.devices = [] // 清空设备列表
 			that.connectedDevice = {}
+			uni.stopBluetoothDevicesDiscovery() //停止扫描附近蓝牙
 			uni.openBluetoothAdapter({
 				success(res) {
 					console.log('蓝牙适配器初始化成功', res)
-					uni.stopBluetoothDevicesDiscovery() //停止扫描附近蓝牙
 					uni.startBluetoothDevicesDiscovery({
 						success: (res) => {
 							console.log('开始扫描', res)
@@ -721,10 +721,12 @@ export default {
 		}
 	},
 	onLoad() {
-		this.startScan()
 		const historyTag = uni.getStorageSync('historyTag')
 		if (!historyTag) return
 		this.historyTag = historyTag
+	},
+	onShow() {
+		this.startScan()
 	}
 }
 </script>
