@@ -47,6 +47,22 @@ export const orderList = [{
 		text: "Network Query"
 	},
 	{
+		text: 'Enable Blinking',
+		value: 'AT+DEVFD'
+	},
+	{
+		text: 'Disable Blinking',
+		value: 'AT+DEVFDAB'
+	},
+	{
+		text: 'Activate Buzzer',
+		value: 'AT+BUZZER=1'
+	},
+	{
+		text: 'Deactivate Buzzer',
+		value: 'AT+BUZZER=0'
+	},
+	{
 		value: "AT+WFFCONF=?",
 		text: "WiFi Query"
 	},
@@ -252,6 +268,22 @@ export const orderList2 = [{
 	{
 		text: '网络查询',
 		value: 'AT+STATUS=?'
+	},
+	{
+		text: '闪灯',
+		value: 'AT+DEVFD'
+	},
+	{
+		text: '关灯',
+		value: 'AT+DEVFDAB'
+	},
+	{
+		text: '响铃',
+		value: 'AT+BUZZER=1'
+	},
+	{
+		text: '关闭',
+		value: 'AT+BUZZER=0'
 	},
 	{
 		text: 'wifi查询',

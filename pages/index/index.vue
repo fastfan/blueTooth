@@ -34,13 +34,7 @@
 			<view v-show="current === 0" class="tab-one">
 				<view class="search-con">
 					<view class="search-con-left">
-						<uni-easyinput
-							trim="all"
-							v-model="searchValue"
-							@clear="clearName"
-							placeholder="请输入设备名称"
-							@input="input"
-						></uni-easyinput>
+						<uni-easyinput trim="all" v-model="searchValue" @clear="clearName" placeholder="请输入设备名称" @input="input"></uni-easyinput>
 						<button class="btn2" size="mini" @click="searchMethod">{{ $t('Search') }}</button>
 					</view>
 					<button type="primary" size="mini" class="btn2" @click="startScan">{{ $t('Scan Device') }}</button>
@@ -69,7 +63,6 @@
 				</view>
 			</view>
 			<view v-show="current === 1" class="tab-two">
-				<view class="order-title">AT {{ $t('Order') }}</view>
 				<view class="order-list">
 					<view class="title">{{ $t('Comoon') }}{{ $t('Order') }}</view>
 					<view class="list-cont2">
@@ -109,12 +102,7 @@
 								@click="clickTag(item)"
 								style="margin-top: 20rpx"
 							></uni-tag>
-							<uni-icons
-								@click="deleteTag(index)"
-								type="clear"
-								size="20"
-								style="position: absolute; right: 2rpx; top: -6rpx"
-							></uni-icons>
+							<uni-icons @click="deleteTag(index)" type="clear" size="20" style="position: absolute; right: 2rpx; top: -6rpx"></uni-icons>
 						</view>
 					</view>
 				</view>
@@ -183,12 +171,7 @@
 						<uni-datetime-picker class="search-item" v-model="rangeTime" type="daterange" @maskClick="maskClick" />
 					</view>
 					<view class="search-bar">
-						<uni-data-select
-							class="search-item"
-							v-model="recordValue"
-							:localdata="range"
-							@change="recordChange"
-						></uni-data-select>
+						<uni-data-select class="search-item" v-model="recordValue" :localdata="range" @change="recordChange"></uni-data-select>
 						<uni-search-bar
 							class="search-item"
 							radius="5"
@@ -434,6 +417,7 @@ export default {
 						uni.stopBluetoothDevicesDiscovery() //停止扫描附近蓝牙
 						setTimeout(() => {
 							uni.showToast({ title: '连接成功', icon: 'success' })
+							this.current = 1
 						}, 1000)
 					},
 					fail: (err) => {
@@ -691,8 +675,8 @@ export default {
 				icon: 'success'
 			})
 			this.historyTag.push(value)
-			const uniqueArray = [...new Set(this.historyTag)]
-			uni.setStorageSync('historyTag', uniqueArray)
+			this.historyTag = Array.from(new Set(this.historyTag))
+			uni.setStorageSync('historyTag', this.historyTag)
 			this.orderList.push({ time: this.transTime(), type: 'send', anser: value })
 		},
 		clickTag(item) {
@@ -826,7 +810,7 @@ export default {
 				display: flex;
 				flex-wrap: wrap;
 				justify-content: space-between;
-				max-height: 160rpx;
+				max-height: 320rpx;
 				overflow-y: scroll;
 			}
 			.title {
