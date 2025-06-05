@@ -34,10 +34,15 @@
 			<view v-show="current === 0" class="tab-one">
 				<view class="search-con">
 					<view class="search-con-left">
-						<uni-easyinput trim="all" v-model="searchValue" @clear="clearName" placeholder="请输入设备名称" @input="input"></uni-easyinput>
+						<uni-easyinput
+							trim="all"
+							v-model="searchValue"
+							@input="inputMethod"
+							@clear="clearName"
+							placeholder="请输入设备名称"
+						></uni-easyinput>
 						<button class="btn2" size="mini" @click="searchMethod">{{ $t('Search') }}</button>
 					</view>
-					<button type="primary" size="mini" class="btn2" @click="startScan">{{ $t('Scan Device') }}</button>
 				</view>
 				<view class="tab-one-list">
 					<view class="list-item" v-for="(item, index) in devices" :key="index">
@@ -297,14 +302,15 @@ export default {
 	},
 	methods: {
 		searchMethod() {
-			if (this.devices.length == 0) {
-				uni.showToast({ title: '请先扫描设备', icon: 'none' })
-				return
-			}
 			if (!this.searchValue) {
 				uni.showToast({ title: '请输入设备名称', icon: 'none' })
 				return
 			}
+			const deviceList = this.devices.filter((item) => item.name.toLowerCase().includes(this.searchValue.toLowerCase()))
+			this.devices = deviceList
+			if (this.devices.length == 0) uni.showToast({ title: '未查询到设备', icon: 'none' })
+		},
+		inputMethod() {
 			const deviceList = this.devices.filter((item) => item.name.toLowerCase().includes(this.searchValue.toLowerCase()))
 			this.devices = deviceList
 			if (this.devices.length == 0) uni.showToast({ title: '未查询到设备', icon: 'none' })
@@ -715,6 +721,7 @@ export default {
 		}
 	},
 	onLoad() {
+		this.startScan()
 		const historyTag = uni.getStorageSync('historyTag')
 		if (!historyTag) return
 		this.historyTag = historyTag
